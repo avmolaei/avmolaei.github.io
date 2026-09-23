@@ -285,7 +285,26 @@
     font-size: 0.76rem;
     color: var(--signal);
     list-style: none;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 60ch;
+  }
+  details.tl-more summary .more-label,
+  details.edu-more summary .more-label {
+    flex: none;
+  }
+  details.tl-more summary .summary-trace,
+  details.edu-more summary .summary-trace {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 18px;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  details.tl-more[open] summary .summary-trace,
+  details.edu-more[open] summary .summary-trace {
+    opacity: 1;
   }
   details.tl-more summary::-webkit-details-marker,
   details.edu-more summary::-webkit-details-marker { display: none; }
@@ -501,7 +520,7 @@
         <div class="tl-org">Bosch France · Drancy, Île-de-France</div>
         <div class="tl-preview justify">Full-scope ownership of validation infrastructure: from bench design and lab compliance to test execution and customer-facing result analysis.</div>
         <details class="tl-more">
-          <summary>See more →</summary>
+          <summary><span class="more-label">See more →</span><canvas class="mini-trace summary-trace" width="240" height="40" aria-hidden="true"></canvas></summary>
           <div class="tl-cat">
             <div class="tl-cat-name">Test Bench Lead <span class="tl-cat-sub">— Validation activities for Stellantis (J4U, EMP2v4)</span></div>
             <ul class="tl-cat-list">
@@ -555,7 +574,7 @@
         <div class="tl-org">Bosch France · Drancy, Île-de-France</div>
         <div class="tl-preview justify">Designed, built, and operated specialized test benches for vibrational and flow-rate validation, with a focus on automation and reliability improvements.</div>
         <details class="tl-more">
-          <summary>See more →</summary>
+          <summary><span class="more-label">See more →</span><canvas class="mini-trace summary-trace" width="240" height="40" aria-hidden="true"></canvas></summary>
           <div class="tl-cat">
             <div class="tl-cat-name">IIS Test Bench Responsible <span class="tl-cat-sub">— Vibrational validation of ESP ECU internal inertial sensor</span></div>
             <ul class="tl-cat-list">
@@ -590,7 +609,7 @@
         <div class="tl-org">ETAS · Saint-Ouen, Île-de-France · Contrat en alternance</div>
         <div class="tl-preview justify">Hands-on R&amp;D and prototyping of ECU/vehicle virtualization solutions, from rapid software integration to distributed embedded cloud computing PoCs.</div>
         <details class="tl-more">
-          <summary>See more →</summary>
+          <summary><span class="more-label">See more →</span><canvas class="mini-trace summary-trace" width="240" height="40" aria-hidden="true"></canvas></summary>
           <div class="tl-cat">
             <ul class="tl-cat-list">
               <li>PoC and prototypes focused around the virtualization of the ECU, the car, and its environment</li>
@@ -608,7 +627,7 @@
         <div class="tl-org">ANA-DATA-TEC SARL S · Differdange, Luxembourg · Stage</div>
         <div class="tl-preview justify">Complete development of medicata, the digital health record.</div>
         <details class="tl-more">
-          <summary>See more →</summary>
+          <summary><span class="more-label">See more →</span><canvas class="mini-trace summary-trace" width="240" height="40" aria-hidden="true"></canvas></summary>
           <div class="tl-cat">
             <p class="tl-full-intro justify">From idea, to the requirements, spec book, GUI design, database handling, Java programming.</p>
           </div>
@@ -630,7 +649,7 @@
       </div>
       <div class="edu-preview justify">Engineering Cycle (2020–2023) — Engineering Sciences: Embedded Architectures &amp; Electronics, Embedded Software.</div>
       <details class="edu-more">
-        <summary>See more →</summary>
+        <summary><span class="more-label">See more →</span><canvas class="mini-trace summary-trace" width="240" height="40" aria-hidden="true"></canvas></summary>
         <div class="edu-full">
           <p class="justify">Preparatory cycle (2018–2020) — Theoretical Mathematics &amp; Physics, Analog Electronics and Digital Electronics, Computer science.</p>
           <p class="justify">Elective &amp; Workshop classes: Neo4J database creation, Arduino with Bluetooth &amp; Android robotics.</p>
@@ -883,10 +902,10 @@
   // content stacking on top of each other).
   (function () {
     document.querySelectorAll('details.tl-more, details.edu-more').forEach(function (d) {
-      var s = d.querySelector('summary');
-      if (!s) return;
+      var label = d.querySelector('summary .more-label');
+      if (!label) return;
       d.addEventListener('toggle', function () {
-        s.textContent = d.open ? 'Show less' : 'See more →';
+        label.textContent = d.open ? 'Show less' : 'See more →';
       });
     });
   })();
