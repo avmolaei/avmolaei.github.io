@@ -1,337 +1,990 @@
-
-<!DOCTYPE html>
-<html>
-<title>Avesta MOLAEI</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!doctype html>
+<title>Avesta Molaei</title>
 <style>
-html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+  @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@600;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  /* Drop isocpeur.woff2 (+ .woff) into a /fonts folder next to this file, using
+     these exact filenames, and every heading + the name in the hero switches
+     to it automatically. Until then, Titillium Web stands in as the closest
+     free approximation of that technical-lettering look. */
+  @font-face {
+    font-family: 'ISOCPEUR';
+    src: url('fonts/isocpeur.woff2') format('woff2'),
+         url('fonts/isocpeur.woff') format('woff');
+    font-display: swap;
+  }
+
+  :root {
+    --bg: #f2f4f6;
+    --surface: #ffffff;
+    --surface-2: #eaeef1;
+    --ink: #142230;
+    --ink-muted: #4a5c6e;
+    --ink-faint: #7c8b9a;
+    --line: #c9d2d9;
+    --line-strong: #a9b6bf;
+    --signal: #c97a12;
+    --signal-ink: #ffffff;
+    --scrim: rgba(10, 14, 18, 0.82);
+    --shadow: 0 1px 0 rgba(20, 34, 48, 0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1720;
+      --surface: #16212c;
+      --surface-2: #1c2933;
+      --ink: #e7edf2;
+      --ink-muted: #8fa3b5;
+      --ink-faint: #5c7082;
+      --line: #2a3a48;
+      --line-strong: #3a4d5c;
+      --signal: #f0a93e;
+      --signal-ink: #16212c;
+      --shadow: none;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0f1720;
+    --surface: #16212c;
+    --surface-2: #1c2933;
+    --ink: #e7edf2;
+    --ink-muted: #8fa3b5;
+    --ink-faint: #5c7082;
+    --line: #2a3a48;
+    --line-strong: #3a4d5c;
+    --signal: #f0a93e;
+    --signal-ink: #16212c;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-attachment: fixed;
+    background-position: -1px -1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+
+  h1, h2, h3, .titlecase {
+    font-family: 'ISOCPEUR', 'Titillium Web', system-ui, sans-serif;
+    text-wrap: balance;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .justify { text-align: justify; text-justify: inter-word; hyphens: auto; }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- Theme toggle ---------- */
+  .theme-toggle {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 50;
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    box-shadow: var(--shadow);
+  }
+  .theme-toggle button {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    padding: 5px 9px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .theme-toggle button[aria-pressed="true"] {
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+
+  /* ---------- Panel / corner-mark system ---------- */
+  .panel {
+    position: relative;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 40px clamp(20px, 4vw, 48px);
+  }
+  .panel + .panel { border-top: none; }
+  .corner { position: absolute; width: 10px; height: 10px; pointer-events: none; }
+  .corner::before, .corner::after { content: ""; position: absolute; background: var(--line-strong); }
+  .corner-tl { top: -1px; left: -1px; }
+  .corner-tr { top: -1px; right: -1px; }
+  .corner-bl { bottom: -1px; left: -1px; }
+  .corner-br { bottom: -1px; right: -1px; }
+  .corner-tl::before, .corner-tr::before, .corner-bl::before, .corner-br::before { width: 10px; height: 1px; top: 0; }
+  .corner-tl::after, .corner-tr::after, .corner-bl::after, .corner-br::after { width: 1px; height: 10px; left: 0; }
+  .corner-bl::before, .corner-br::before { top: auto; bottom: 0; }
+  .corner-tr::after, .corner-br::after { left: auto; right: 0; }
+
+  section { position: relative; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding-top: clamp(56px, 10vw, 96px);
+    padding-bottom: 40px;
+  }
+  .hero-top {
+    display: flex;
+    gap: clamp(24px, 5vw, 48px);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .photo-frame {
+    flex: none;
+    width: 128px;
+    height: 128px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-2);
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 900ms ease;
+  }
+  .photo-frame img.is-active { opacity: 1; }
+  .photo-frame .fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'ISOCPEUR', 'Titillium Web', sans-serif;
+    font-weight: 700;
+    font-size: 2.6rem;
+    color: var(--ink-muted);
+  }
+  .hero-name-block { flex: 1 1 320px; min-width: 0; }
+  .hero h1 {
+    font-size: clamp(2.6rem, 7vw, 4.6rem);
+    font-weight: 800;
+    line-height: 0.96;
+    letter-spacing: -0.01em;
+  }
+  .hero .role {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    color: var(--ink-muted);
+    margin-top: 10px;
+  }
+  .hero .role strong { color: var(--ink); font-weight: 500; }
+
+  .contact-strip {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+  }
+  .contact-strip a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding-right: 14px;
+    margin-right: 14px;
+    border-right: 1px solid var(--line);
+  }
+  .contact-strip a:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+  .contact-strip a:hover { color: var(--signal); }
+
+  /* ---------- Section headings ---------- */
+  .section-head { margin-bottom: 28px; }
+  .section-head h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 700;
+  }
+  .section-head h2 .idx { color: var(--signal); }
+  .section-head h2 .sep { color: var(--line-strong); margin: 0 0.28em; font-weight: 400; }
+  .section-lede {
+    color: var(--ink-muted);
+    max-width: 62ch;
+    margin-top: 10px;
+    font-size: 0.98rem;
+  }
+
+  /* ---------- About / bio ---------- */
+  .about p { max-width: 66ch; color: var(--ink); }
+  .about p + p { margin-top: 16px; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom, var(--line-strong) 0 4px, transparent 4px 8px);
+  }
+  .tl-item { position: relative; padding-bottom: 34px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -28px;
+    top: 5px;
+    width: 9px;
+    height: 9px;
+    background: var(--bg);
+    border: 2px solid var(--ink-faint);
+  }
+  .tl-item.current::before { border-color: var(--signal); background: var(--signal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 25%, transparent); }
+  .tl-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .tl-item.current .tl-date { color: var(--signal); }
+  .tl-role { font-size: 1.15rem; font-weight: 600; margin-top: 4px; }
+  .tl-org { color: var(--ink-muted); font-size: 0.95rem; }
+  .tl-preview { color: var(--ink-muted); font-size: 0.92rem; margin-top: 8px; max-width: 60ch; }
+
+  details.tl-more, details.edu-more { margin-top: 10px; }
+  details.tl-more summary, details.edu-more summary {
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--signal);
+    list-style: none;
+    display: inline-block;
+  }
+  details.tl-more summary::-webkit-details-marker,
+  details.edu-more summary::-webkit-details-marker { display: none; }
+  details.tl-more summary::marker,
+  details.edu-more summary::marker { content: ""; }
+
+  .tl-full-intro { color: var(--ink-muted); font-size: 0.9rem; margin-top: 10px; max-width: 60ch; }
+  .tl-cat { margin-top: 16px; max-width: 62ch; }
+  .tl-cat:first-child { margin-top: 12px; }
+  .tl-cat-name { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+  .tl-cat-sub { font-weight: 400; font-style: italic; color: var(--ink-muted); }
+  .tl-cat-list { margin: 6px 0 0; padding-left: 18px; color: var(--ink-muted); font-size: 0.88rem; }
+  .tl-cat-list li { margin-bottom: 4px; }
+  .tl-cat-list li::marker { color: var(--signal); }
+  .tl-tags { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tl-tags span { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--ink-faint); border: 1px solid var(--line); padding: 2px 7px; }
+
+  /* ---------- Education ---------- */
+  .edu-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: baseline; }
+  .edu-school { font-size: 1.1rem; font-weight: 600; }
+  .edu-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--ink-faint); white-space: nowrap; }
+  .edu-preview { color: var(--ink-muted); font-size: 0.92rem; margin-top: 8px; max-width: 60ch; }
+  .edu-full p { color: var(--ink-muted); font-size: 0.92rem; max-width: 60ch; margin: 10px 0 0; }
+
+  /* ---------- Certifications: ledger list ---------- */
+  .cert-ledger { border-top: 1px solid var(--line); }
+  .cert-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .cert-name { font-size: 0.98rem; display: flex; align-items: baseline; gap: 10px; }
+  .cert-mark {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--signal);
+    border: 1px solid var(--signal);
+    padding: 1px 6px;
+    flex: none;
+  }
+  .cert-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: var(--ink-faint); white-space: nowrap; letter-spacing: 0.04em; }
+
+  /* ---------- Projects ---------- */
+  .project-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  @media (min-width: 700px) { .project-grid { grid-template-columns: 1fr 1fr; } }
+  .project-card { background: var(--surface); display: flex; flex-direction: column; }
+
+  .project-media {
+    display: block;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .project-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .project-media .media-placeholder {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint);
+    background: repeating-linear-gradient(135deg, var(--line) 0 1px, transparent 1px 14px);
+  }
+  .project-media img.is-loaded ~ .media-placeholder { display: none; }
+  .media-hover {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, var(--scrim), transparent);
+    padding: 16px 12px 8px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+  .project-media:hover .media-hover,
+  .project-media:focus-visible .media-hover { opacity: 1; transform: translateY(0); }
+  canvas.mini-trace { display: block; width: 100%; height: 30px; }
+  .media-hover-text {
+    display: block;
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+  }
+
+  .project-body { padding: 22px 24px 26px; flex: 1; display: flex; flex-direction: column; }
+  .project-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .project-name { font-family: 'ISOCPEUR', 'Titillium Web', sans-serif; font-weight: 700; font-size: 1.5rem; }
+  .project-tag {
+    position: relative;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+    border: 1px solid var(--signal);
+    padding: 3px 8px;
+    white-space: nowrap;
+    cursor: default;
+  }
+  .project-tag[data-tooltip]:hover::after,
+  .project-tag[data-tooltip]:focus-visible::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: min(210px, 68vw);
+    box-sizing: border-box;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.72rem;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.4;
+    padding: 8px 10px;
+    z-index: 10;
+  }
+  .project-desc { color: var(--ink-muted); font-size: 0.92rem; margin-top: 10px; max-width: 54ch; }
+  .project-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: auto; padding-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink-faint); }
+
+  /* ---------- Toolset ---------- */
+  .toolset-groups { display: flex; flex-direction: column; gap: 26px; }
+  .toolset-group + .toolset-group { padding-top: 26px; border-top: 1px solid var(--line); }
+  .toolset-group-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+    margin-bottom: 10px;
+  }
+  .toolset-list { margin: 0; padding: 0; list-style: none; }
+  .toolset-list li {
+    color: var(--ink);
+    font-size: 0.95rem;
+    padding: 6px 0;
+    border-top: 1px solid var(--line);
+    max-width: 68ch;
+  }
+  .toolset-list li:first-child { border-top: none; }
+  .toolset-list .prof { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; }
+
+  /* ---------- Footer ---------- */
+  .footer { padding: 40px clamp(20px, 4vw, 48px) 56px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .footer .socials { display: flex; gap: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
+  .footer .socials a { text-decoration: none; color: var(--ink-muted); }
+  .footer .socials a:hover { color: var(--signal); }
+  .footer .meta { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink-faint); }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    .panel { padding: 32px 18px; }
+  }
 </style>
-<body class="w3-light-grey">
 
-<!-- Page Container -->
-<div class="w3-content w3-margin-top" style="max-width:1400px;">
-
-  <!-- The Grid -->
-  <div class="w3-row-padding">
-  
-    <!-- Left Column -->
-    <div class="w3-third ">
-    
-      <div class="w3-white w3-text-grey w3-card-4">
-        <div class="w3-display-container">
-          <img src="avesta.png" style="width:100%" alt="Avesta">
-          <div class="w3-display-bottomleft w3-container w3-text-white">
-              <p></p>
-            <h2>Avesta Molaei</h2>
-          </div>
-        </div>
-        <div class="w3-container">
-          <p><i class="fa fa-asterisk fa-fw w3-margin-right w3-text-teal"></i><i>Passionné de Sciences & de Technologies</i></p>
-          <p><i class="fa fa-briefcase fa-fw w3-margin-right w3-large w3-text-teal"></i>Etudiant à l'ESIEE Paris</p>
-          <p><i class="fa fa-briefcase fa-fw w3-margin-right w3-large w3-text-teal"></i>Apprenti en Prototypage et Virtualisation - ETAS</p>
-          <p><i class="fa fa-home fa-fw w3-margin-right w3-large w3-text-teal"></i>Marne la Vallée, France</p>
-          <p><i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal"></i>avmolaei@gmail.com</p>
-          <p><i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal"></i>avesta.molaei@edu.esiee.fr</p>
-          <p><i class="fa fa-linkedin fa-fw w3-margin-right w3-large w3-text-teal"></i><a href="https://www.linkedin.com/in/avesta-molaei/">linkedin.com/in/avesta-molaei</a></p>
-          <p><i class="fa fa-desktop fa-fw w3-margin-right w3-large w3-text-teal"></i><a href="https://perso.esiee.fr/~molaeia">perso.esiee.fr/~molaeia</a></p><p><i class="fa fa-phone fa-fw w3-margin-right w3-large w3-text-teal"></i>06.51.69.37.56</p><button class="w3-button w3-teal w3-padding-large w3-margin-top w3-margin-bottom"><a href="cv.pdf">
-        <i class="fa fa-download w3-margin-right"></i>Téléchargez mon CV!</a>
-      </button><hr>
-            <p class="w3-large"><b><i class="fa fa-flag fa-fw w3-margin-right w3-text-teal"></i>Langues</b></p>
-          <p>Français <i></i></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:100%">
-              <div class="w3-center w3-text-white">Langue maternelle</div>
-            </div>
-          </div>
-          <p>Anglais <i></i></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:90%"> Bilingue, maitrise professionelle complète</div>
-          </div>
-          
-          <p>Allemand <i></i></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:50%">maitrise limitée</div>
-          </div>
-          <p>Persan <i></i></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:40%">Langue maternelle</div>
-          </div><hr>
-        
-        
-            <p class="w3-large"><b><i class="fa fa-asterisk fa-fw w3-margin-right w3-text-teal"></i>Compétences</b></p>
-          <p><b>Electronique</b></p> <i>Simulation (Cadence, LTspice), Conception (Eagle, KiCAD, EasyEDA), Soudure, Tests & Mesures</p>
-          <p>Plateformes MCU: PIC16F, ATMEL AVR, STM32F4, ARM CORTEX M7</p>
-          <p>Electronique Analogique & numérique</i></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:80%">
-              <div class="w3-center w3-text-white">80%</div>
-            </div>
-          </div>
-          <p><b>CFAO</b></p> 
-          <p>Autodesk Fusion 360 (Avancé)</p>
-          <p>CATIA v5 (basique)</p><div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:75%">75%</div>
-          </div>
-          
-          <p><b>Machines & Outillage</b><p> <i>Impression 3D, Usinage CNC, Soudure, Oscilloscopes, Multimètres </i></p></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:80%">80%</div>
-          </div>
-          <p><b>Technologies Automobiles</b><p> <i>Système embarqué automobile, MCD, Calculateurs 
-            Virtuels, outils ETAS (basique) & Vector (basique), 
-            Applicatif AUTOSAR (débutant) </i></p></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:65%">65%</div>
-          </div>
-          <p><b>Programmation</b><p> <i>C, Java, MATLAB/Simulink, Java pour Android (medium) </i></p></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:55%">60%</div>
-          </div> 
-          <p><b>Autres Compétences Logicielles</b><p> <i>Linux (Avancé), Réseaux & NAS (bases), IaaS/PaaS/SaaS
-            (bases), Virtualisation (VMware, VirtualBox), Git, Github
-            Bureautique (suites Office et Google) </i></p></p>
-          <div class="w3-light-grey w3-round-xlarge w3-small">
-            <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:50%">50%</div>
-          </div>
-         
-          <br><hr>
-
-          
-          <p class="w3-large w3-text-theme"><b><i class="fa fa-quote-right fa-fw w3-margin-right w3-text-teal w3-margin-bottom"></i>Petite Citation...</b></p>
-          <div class="w3-panel  w3-leftbar w3-light-grey">
-          <p class="w3-xlarge w3-serif">
-          <i>"La créativité implique de sortir des sentiers battus, dans le but de regarder les choses d'une manière différente."</i></p>
-          <p>Edward de Bono, <i>Principe de pensée latérale</i></p>
-
-
- 
-</div>
-         
-  <!-- End Grid --><hr>
-   <p class="w3-large w3-text-theme"><b><i class="fa fa-envelope fa-fw w3-margin-right w3-text-teal w3-margin-bottom"></i>Contactez moi:</b></p>
-          
-  <div class="w3-container w3-padding-large w3-grey">
- 
-    <h4 id="contact"><b>Envoyez moi un mail:</b></h4>
-    <!--<form action="https://formspree.io/f/mjvzdgnw" method="POST"> -->
-
-      <div class="w3-section">
-        <label>Nom & Prénom</label>
-        <input  class="w3-input w3-border" placeholder="Votre nom & prénom..." type="text"  name="NOM" required>
-      </div>
-
-      <div class="w3-section">
-        <label>Email</label>
-        <input class="w3-input w3-border" placeholder="Votre adresse email..." type="email" name="ADRESSE"  required>
-      </div>
-
-      <div class="w3-section">
-        <label>Message</label>
-        <textarea  class="w3-input w3-border" rows="5" placeholder="Votre message..." type="text" name="MESSAGE" required></textarea>
-      </div>
-
-      <button  value="send" type="submit"class="w3-button w3-black w3-margin-bottom"><i class="fa fa-paper-plane w3-margin-right"></i>Envoyer!</button>
-
-  <!--  </form>-->
-
-  </div>
-<hr>
-  </div><br>
-      </div>
-
-    <!-- End Left Column -->
-    </div>
-<!---->
-    <!-- Right Column -->
-    <div class="w3-twothird">
-    
-      <div class="w3-container w3-card w3-white w3-margin-bottom">
-        <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-certificate fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Formation</h2>
-        <div class="w3-container">
-          <h5 class="w3-opacity"><b>ESIEE Paris, Ecole d'ingénieurs, deuxième année - <i>Noisy le Grand (93)</i></b></h5>
-          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>2020 - <span class="w3-tag w3-teal w3-round">Actuellement</span> : Cycle ingénieur</h6>
-          <p>Filière Systèmes Embarqués, Transports et Objets Intelligents</p>
-          <p>Sciences de l'ingénieur, Electronique et architectures, Logiciels Embarqués, Applications d'ingénierie embarquée </p>
-          <p>Projets pluridisciplinaires</p>
-          <p>TOEIC (990/990) et Certification Voltaire (644, code : HK6FV73)</p>
-          <hr>
-            <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>2018 - 2020 : Cycle préparatoire</h6>
-            <p>Admission suite au concours puissance alpha</p>
-            <p>Mathématiques, Physique, Electronique, Informatique, Sciences Humaines & Anglais</p>
-            <p>Projets de Java, C, d'électronique</p>
-            <hr>
-          </div>
-          <div class="w3-container">
-            <h5 class="w3-opacity"><b>Lycée St Laurent LPND - <i>Lagny s/ Marne (77)</i></b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>2015 - 2018</h6>
-            <p>Obtention du Baccalauréat Scientifique Général avec mention très bien (2018)</p>
-            <p>Création de sites web et d’une «IA» basique en ISN avec Udacity et Python (2018)</p>
-            <p>TPE réalisé sur la robotique : détection et interprétation de mouvement (2017)</p>
-            <p>Création d'une campagne de sensibilisation à l’écologie en classes de primaires (2017)</p>
-            <p>Validation du Cambridge FCE et de la Certification Allemand en seconde (2015-2016) </p>
-            <hr>
-          </div>
-        
-      </div>
-
-      <div class="w3-container w3-card w3-white w3-white w3-margin-bottom">
-        <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-suitcase fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Expérience professionelle</h2>
-        <div class="w3-container">
-          <h5 class="w3-opacity"><b>Apprenti en Prototypage et Virtualisation <i>, ETAS France</i></b></h5>
-          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>2020 - <span class="w3-tag w3-teal w3-round">Actuellement</span></h6>
-          <p>Alternance centrée autour de la virtualisation du calculateur, de la voiture, et de son environnement.</p>
-          <p>Développement d’une plateforme de calcul distribuée en SaaS avec Apache Cloudstack et AWS</p>
-          <p>Prototypage Logiciel (MATLAB/Simulink, eHOOKS, INTECRIO)</p>
-          <p>Programmation C et Ruby ; Tests HiL/SiL (COSYM) </p>
-          <hr>  
-        </div>
-        <div class="w3-container">
-            <h5 class="w3-opacity"><b>Développement d'applications Android <i>ANA DATA TEC SARL S</i></b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Aout 2019 - Décembre 2019</h6>
-            <p>Développement complet de <i>medicata</i>, un carnet de santé numérique (Android Studio, Java, XML, Tech Android) </p>
-            <p>Réalisation du Cahier des charges </p>
-            <hr>  
-          </div>
-          <!--<span class="w3-tag w3-teal w3-round">Actuellement</span>POUR LE "Actuellement"-->
-        <div class="w3-container">
-            <h5 class="w3-opacity"><b>Cours de soutien, <i>INDEPENDANT</i></b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Septembre 2018 - Septembre 2019</h6>
-          <p>Assistance et aide de collégiens et lycéens via la plateforme <i>Superprof</i> en sciences & en anglais </p>
-          <p>Prise en charge d’élèves, visualisation des difficultés, revue du cours, exercices & bilan. </p>
-            <hr>  
-          </div>
-          <div class="w3-container">
-            <h5 class="w3-opacity"><b>Stagiaire, <i>NATIXIS SSI</i></b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Juillet 2017 </h6>
-            <p>Stage d'osbervation de seconde, sensibilisation à la sécurité des systèmes</p>
-            <hr>
-          </div>
-          <div class="w3-container">
-            <h5 class="w3-opacity"><b>Assistance & Aide, <i>TABLETTES & ACCESSOIRES</i> </b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Nov 2017 - Dec 2017</h6>
-            <p>Aide dans une start-up de vente de produits High-tech: réalisation des commandes, inventaires, stocks, déploiement physique de matériel (serveurs, postes de travail) . </p><br>
-            <hr>
-          </div>
-        
-      </div>
-
-      <div class="w3-container w3-card w3-white w3-white w3-margin-bottom">
-        <h2 class="w3-text-grey w3-padding-16"><i class="fa fa-book fa-fw w3-margin-right w3-xxlarge w3-text-teal"></i>Projets & Réalisations</h2>
-  
-
-                
-        <div class="w3-container">
-          <h5 class="w3-opacity"><b>REBEC2A&nbsp;<i>Projet Fil Rouge, Plateforme open source de modélisme automobile</i></b></h5>
-          <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://git.esiee.fr/benkemoj/5e-pr1" target = "_blank">https://git.esiee.fr/benkemoj/5e-pr1</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h6>
-          <p>Successeur Spirituel de la Subaruino, création d'une plateforme Open Source entièrement concue par CAO. Du chassis, à l'électronique, au logiciel ou en passant par la télécommande et la partie RF, tout à été conçu "from scratch"</p>
-          <p> &emsp;&emsp;<i>•CFAO</i>
-          <p> &emsp;&emsp;<i>•Impression 3D et Usinage CNC</i>
-          <p> &emsp;&emsp;<i>•Electronique embarquée (MCU NXP ARM CORTEX M7)</i>
-          <p> &emsp;&emsp;<i>•RadioFréquences</i>            
-          <p> &emsp;&emsp;<i>•Programmation C</i>
-            <p> &emsp;&emsp;<i>•Gestion de projet/Travail de groupe</i>
-          <hr>
-        </div>
-        <div class="w3-container">
-          <h5 class="w3-opacity"><b>rIChard&nbsp;<i>Projet E4FE, Plateforme open source de domotique</i></b></h5>
-          <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://github.com/avmolaei/rIChard" target = "_blank">https://github.com/avmolaei/rIChard</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h6>
-          <p>Conception d'une plateforme de domotique par bluetooth, open source dans sa conception, avec fonctionnalités de reconnaissance vocale </p>
-          <p> &emsp;&emsp;<i>•Arduino</i>
-          <p> &emsp;&emsp;<i>•Programmation C</i>
-          <p> &emsp;&emsp;<i>•Electronique embarquée (MCU ATMEL AVR)</i>
-          <p> &emsp;&emsp;<i>•Programmation Java pour Android</i>            
-          <p> &emsp;&emsp;<i>•Création d'applications</i>
-            <p> &emsp;&emsp;<i>•Gestion de projet/Travail de groupe</i>
-          <hr>
-        </div>    
-        <div class="w3-container">
-                <h5 class="w3-opacity"><b>Subaruino, Systèmes de sécurité & automobile&nbsp;<i>Projet d'Atelier, deuxième année du cycle préparatoire</i></b></h5>
-                <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://perso.esiee.fr/~molaeia/atwb" target = "_blank">https://perso.esiee.fr/~molaeia/atwb</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h6>
-                <p>Création d'une voiture miniuature équipée de systèmes d'assistance à la conduite: radar de recul, freinage d'urgence, aide au maintien de voie, automatisation de l'éclairage,</p>
-                <p> &emsp;&emsp;<i>•Arduino</i>
-                <p> &emsp;&emsp;<i>•Robotique</i>
-                <p> &emsp;&emsp;<i>•Programmation C</i>
-                <p> &emsp;&emsp;<i>•Electronique embarquée</i>            
-                <p> &emsp;&emsp;<i>•Gestion de projet/Travail de groupe</i>
-                <hr>
-              </div>
-        <div class="w3-container">
-                <div class="w3-container">
-                        <h5 class="w3-opacity"><b>Robotique avec Android par Bluetooth&nbsp;<i>Projet d'Elective, deuxième année du cycle préparatoire</i></b></h5>
-                        <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://perso.esiee.fr/~molaeia/eig.rar" target = "_blank">https://perso.esiee.fr/~molaeia/eig.rar</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h6>
-                        <p>Création d'un robot controllé par une application Android, développement complet</p>
-                        <p> &emsp;&emsp;<i>•Arduino</i>
-                        <p> &emsp;&emsp;<i>•Programmation C</i>
-                        <p> &emsp;&emsp;<i>•Electronique embarquée</i>      
-                        <p> &emsp;&emsp;<i>•Protocole Bluetooth</i>      
-                        <p> &emsp;&emsp;<i>•Programmation Java pour Android, XML</i>  
-                        <p> &emsp;&emsp;<i>•Création d'applications</i>  
-                        <p> &emsp;&emsp;<i>•Gestion de projet/Travail de groupe</i>
-                        <hr>
-                      </div>
-                <div class="w3-container">
-            <h5 class="w3-opacity"><b>Mission CAT!,&nbsp;<i>Projet d'IPO, première année du cycle préparatoire</i></b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://perso.esiee.fr/~molaeia/mc/index.html" target = "_blank">https://perso.esiee.fr/~molaeia/</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h6>
-            <p>Création d'un simple jeu d'aventure texte pour la découverte des notions objets en Java</p>
-            <p> &emsp;&emsp;<i>•Java</i>
-            <p> &emsp;&emsp;<i>•BlueJ</i>
-            <p> &emsp;&emsp;<i>•Programmation objet</i>            
-            <p> &emsp;&emsp;<i>•Développement Web</i>
-            <hr>
-          </div>
-          <div class="w3-container">
-            <h5 class="w3-opacity"><b>Le Lithium en Bolivie,&nbsp;<i>Projet de MSH, première année du cycle préparatoire</i></b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://avmolaei.github.io/controlith/#" target = "_blank">https://avmolaei.github.io/controlith/#</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h6>
-            <p>Etude de la controverse concernant l'exploitation des salars de Lithium en Bolivie</p>
-            <p> &emsp;&emsp;<i>•Gestion de projet</i>
-            <p> &emsp;&emsp;<i>•Etude de controverses</i>
-            <p> &emsp;&emsp;<i>•Réalisation d'une synthèse</i>            
-            <p> &emsp;&emsp;<i>•Développement Web</i>
-            <hr>
-          </div>
-          <div class="w3-container">
-            <h5 class="w3-opacity"><b>A.L.I.C.E,&nbsp;<i>Projet d'ISN, Terminale</i> </b></h5>
-            <h6 class="w3-text-teal"><i class="fa fa-globe fa-fw w3-margin-right"></i><a href = "https://github.com/avmolaei/isn_code" target = "_blank">https://github.com/avmolaei/isn_code</a></h6>
-            <p>Réalisation d'une "IA" basique dans le cade du projet d'ISN en Python avec Keras & Udacity</p>
-            <p> &emsp;&emsp;<i>•Gestion de projet</i>
-            <p> &emsp;&emsp;<i>•Python</i>
-            <p> &emsp;&emsp;<i>•IA & Machine Learning</i>
-            <p> &emsp;&emsp;<i>•Auto-formation & Recherche</i>
-            <p> &emsp;&emsp;<i>•Anaconda, Keras, sklearn, numpy, pandas</i>
-            <p> &emsp;&emsp;<i>•Préparation de rapport, cahier de charges & présentations</i>
-            <p> &emsp;&emsp;<i>•Introduction à Git & Github</i>
-          <hr>
-          </div>
-      </div>
-
-
-
-
-
-
-
-    <!-- End Right Column -->
-    </div>
-
-
-  
-    </div>
-  <!-- End Page Container -->
+<div class="theme-toggle" role="group" aria-label="Theme">
+  <button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+  <button type="button" data-set-theme="dark" aria-pressed="false">Dark</button>
+  <button type="button" data-set-theme="system" aria-pressed="true">Auto</button>
 </div>
 
-<footer class="w3-container w3-teal w3-center w3-margin-top">
-  <p>Trouvez moi sur les réseaux sociaux</p>
-  
-<a href="https://www.facebook.com/profile.php?id=100010254610916" target="_blank"><i class="fa fa-facebook-official w3-hover-opacity"></i></a>
-  <a href ="https://www.instagram.com/_av3570/" target ="_blank"><i class="fa fa-instagram w3-hover-opacity"></i></a>
-  <a href ="https://twitter.com/Av3570" target ="_blank"> <i class="fa fa-twitter w3-hover-opacity"></i></a>
-  <a href ="https://github.com/avmolaei" target = "_blank"><i class="fa fa-github w3-hover-opacity"></i></a>
-  <a href = "https://www.linkedin.com/in/avesta-molaei/" target = "_blank"><i class="fa fa-linkedin w3-hover-opacity"></i></a>
+<div class="wrap" lang="en">
+
+  <section class="hero">
+    <div class="hero-top">
+      <div class="photo-frame" id="photoFrame" aria-hidden="true">
+        <div class="fallback">AM</div>
+      </div>
+      <div class="hero-name-block">
+        <h1>Avesta<br>Molaei</h1>
+        <p class="role">Automotive Testing Engineer — <strong>Bosch France</strong></p>
+      </div>
+    </div>
+
+    <nav class="contact-strip" aria-label="Contact">
+      <a href="https://www.linkedin.com/in/avesta-molaei/">LinkedIn</a>
+      <a href="https://github.com/avmolaei">GitHub</a>
+      <a href="cv.pdf">CV</a>
+    </nav>
+  </section>
+
+  <section class="panel" aria-labelledby="about-h">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="section-head">
+      <h2 id="about-h"><span class="idx">01</span><span class="sep">-</span>Field notes</h2>
+    </div>
+    <div class="about justify">
+      <p>Hi, I'm Avesta. I'm an embedded systems engineer specialized in automotive testing. I work on the systems that keep a car running, sensing and talking to all its modules correctly.</p>
+      <p>Trained in embedded systems architecture and electronics at ESIEE Paris, I've spent the past six years at Bosch, working on a wide array of topics: first in engine control, specifically in software prototyping and virtualization tools, and then moving into testing and validation for brake systems.</p>
+      <p>Outside of work, I do... the exact same thing. I play around with tech I think is cool, and sometimes my "experiments" are useful. I am also quite fond of cats, cooking, making music, and Japanese animation.</p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="exp-h">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="section-head">
+      <h2 id="exp-h"><span class="idx">02</span><span class="sep">-</span>Trace log</h2>
+    </div>
+    <div class="timeline">
+
+      <div class="tl-item current">
+        <div class="tl-date">May 2025 — Present · 1 yr 5 mo</div>
+        <div class="tl-role">Brake Systems Test Development Engineer</div>
+        <div class="tl-org">Bosch France · Drancy, Île-de-France</div>
+        <div class="tl-preview justify">Full-scope ownership of validation infrastructure: from bench design and lab compliance to test execution and customer-facing result analysis.</div>
+        <details class="tl-more">
+          <summary>See more →</summary>
+          <div class="tl-cat">
+            <div class="tl-cat-name">Test Bench Lead <span class="tl-cat-sub">— Validation activities for Stellantis (J4U, EMP2v4)</span></div>
+            <ul class="tl-cat-list">
+              <li>Responsible for wHiL test bench setup with IPG CarMaker</li>
+              <li>Definition of maneuvers and test script development</li>
+              <li>Full bench development, operation, and execution</li>
+              <li>Result analysis in collaboration with the STLA customer team</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">CIP and Lab Development <span class="tl-cat-sub">— Continuous improvement of test benches and equipment</span></div>
+            <ul class="tl-cat-list">
+              <li>Design and setup of new electrical standard for test bench &amp; lab equipment (NF EN 60204-1 and ISO 13849 compliance)</li>
+              <li>Buildup of new lab process to ensure absolute traceability for testing</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">General Prototyping</div>
+            <ul class="tl-cat-list">
+              <li>Specification, design, and assembly of special bench &amp; lab equipment for special test requests</li>
+              <li>Mechanical, electrical, and software prototyping of testing tools</li>
+              <li>E.g.: custom setup to test wheel speed sensors in the loop, custom CAN/CAN-FD/FlexRay "multiplug" racks for benches, and custom bench control software for more accurate &amp; repeatable maneuvers using game controllers</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">SiL MATLAB/Simulink + CarMaker Simulation <span class="tl-cat-sub">— Simulation activities for Renault (CMF, C-EV)</span></div>
+            <ul class="tl-cat-list">
+              <li>Proxy for simulation activities: environment setup, FMU generation</li>
+              <li>Virtual test execution and result analysis with the REN customer team</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">Function Testing</div>
+            <ul class="tl-cat-list">
+              <li>Validation of braking SW features (ISO 26262)</li>
+              <li>Spec tracking through IBM ALM, DOORS</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">Training</div>
+            <ul class="tl-cat-list">
+              <li>Apprenticeship / trainee coordination &amp; handling</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">Sept 2023 — May 2025 · 1 yr 9 mo</div>
+        <div class="tl-role">Brake Systems Test Bench Engineer</div>
+        <div class="tl-org">Bosch France · Drancy, Île-de-France</div>
+        <div class="tl-preview justify">Designed, built, and operated specialized test benches for vibrational and flow-rate validation, with a focus on automation and reliability improvements.</div>
+        <details class="tl-more">
+          <summary>See more →</summary>
+          <div class="tl-cat">
+            <div class="tl-cat-name">IIS Test Bench Responsible <span class="tl-cat-sub">— Vibrational validation of ESP ECU internal inertial sensor</span></div>
+            <ul class="tl-cat-list">
+              <li>Design, development, sensor integration, calibration, maintenance, automation, and test bench development</li>
+              <li>Test campaign management: communication with requesters, suppliers, and software developers; analysis of test requests, setup of test components on the bench, inventory management</li>
+              <li>Design &amp; implementation of a dual synchronous test bench capable of running endurance tests on two components simultaneously, reducing the test campaign duration by half</li>
+              <li>General bench improvement: optimization &amp; simplification of bench systems to enhance reliability and efficiency</li>
+              <li>Automation of processes to improve result consistency &amp; repeatability</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">Flow Rate Test Bench Responsible <span class="tl-cat-sub">— Flow rate characterization of master cylinders</span></div>
+            <ul class="tl-cat-list">
+              <li>Development, sensor integration, calibration, and test bench setup</li>
+              <li>Test campaign management in collaboration with the materials laboratory</li>
+              <li>Modification of the climatic chamber to control tests in temperature and brake fluid viscosity</li>
+            </ul>
+          </div>
+          <div class="tl-cat">
+            <div class="tl-cat-name">Lab 3D Printing Team</div>
+            <ul class="tl-cat-list">
+              <li>Machine setup and maintenance, material handling</li>
+              <li>Part design &amp; manufacturing to improve bench QoL (SolidWorks, Fusion 360, Cura, PrusaSlicer)</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">Sept 2020 — Sept 2023 · 3 yr 1 mo</div>
+        <div class="tl-role">Prototyping and Virtualization Apprentice</div>
+        <div class="tl-org">ETAS · Saint-Ouen, Île-de-France · Contrat en alternance</div>
+        <div class="tl-preview justify">Hands-on R&amp;D and prototyping of ECU/vehicle virtualization solutions, from rapid software integration to distributed embedded cloud computing PoCs.</div>
+        <details class="tl-more">
+          <summary>See more →</summary>
+          <div class="tl-cat">
+            <ul class="tl-cat-list">
+              <li>PoC and prototypes focused around the virtualization of the ECU, the car, and its environment</li>
+              <li>Automotive rapid software prototyping (MATLAB/Simulink, eHOOKS, INTECRIO)</li>
+              <li>C and Ruby programming; SiL testing (COSYM, LabCar)</li>
+              <li>Design and deployment of an Embedded Cloud Computing platform for distributed ECU Sim/Compute Proof of Concept</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">Jul 2019 — Nov 2019 · 5 mo</div>
+        <div class="tl-role">Android App Developer</div>
+        <div class="tl-org">ANA-DATA-TEC SARL S · Differdange, Luxembourg · Stage</div>
+        <div class="tl-preview justify">Complete development of medicata, the digital health record.</div>
+        <details class="tl-more">
+          <summary>See more →</summary>
+          <div class="tl-cat">
+            <p class="tl-full-intro justify">From idea, to the requirements, spec book, GUI design, database handling, Java programming.</p>
+          </div>
+        </details>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="edu-h">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="section-head">
+      <h2 id="edu-h"><span class="idx">03</span><span class="sep">-</span>Calibration</h2>
+    </div>
+    <div class="edu-item">
+      <div class="edu-head">
+        <div class="edu-school">ESIEE Paris</div>
+        <div class="edu-date">2018 — 2023</div>
+      </div>
+      <div class="edu-preview justify">Engineering Cycle (2020–2023) — Engineering Sciences: Embedded Architectures &amp; Electronics, Embedded Software.</div>
+      <details class="edu-more">
+        <summary>See more →</summary>
+        <div class="edu-full">
+          <p class="justify">Preparatory cycle (2018–2020) — Theoretical Mathematics &amp; Physics, Analog Electronics and Digital Electronics, Computer science.</p>
+          <p class="justify">Elective &amp; Workshop classes: Neo4J database creation, Arduino with Bluetooth &amp; Android robotics.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="cert-h">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="section-head">
+      <h2 id="cert-h"><span class="idx">04</span><span class="sep">-</span>Verified</h2>
+    </div>
+    <div class="cert-ledger">
+      <div class="cert-row">
+        <div class="cert-name"><span class="cert-mark">CERT</span>CAN &amp; FlexRay — Vector CANalyzer</div>
+        <div class="cert-date">MAY 2024</div>
+      </div>
+      <div class="cert-row">
+        <div class="cert-name"><span class="cert-mark">CERT</span>EMC Investigation Techniques</div>
+        <div class="cert-date">MAY 2025</div>
+      </div>
+      <div class="cert-row">
+        <div class="cert-name"><span class="cert-mark">CERT</span>Electrical Safety BR (&lt;1000V)</div>
+        <div class="cert-date">DEC 2023</div>
+      </div>
+      <div class="cert-row">
+        <div class="cert-name"><span class="cert-mark">CERT</span>TOEIC — 990 / 990</div>
+        <div class="cert-date">DEC 2021</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="proj-h">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="section-head">
+      <h2 id="proj-h"><span class="idx">05</span><span class="sep">-</span>Output</h2>
+      <p class="section-lede">My personal projects, built on my own time.</p>
+    </div>
+    <div class="project-grid">
+
+      <div class="project-card">
+        <a class="project-media" href="#" aria-label="CANtrip repository — link to be added">
+          <img alt="" loading="lazy" src="img/projects/cantrip.jpg">
+          <div class="media-placeholder">Image pending</div>
+          <div class="media-hover">
+            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+            <span class="media-hover-text">Click to learn more…</span>
+          </div>
+        </a>
+        <div class="project-body">
+          <div class="project-top">
+            <div class="project-name">CANtrip</div>
+            <div class="project-tag" data-tooltip="These projects are actively used daily!" tabindex="0">Flagship</div>
+          </div>
+          <p class="project-desc justify">Free and Open Source tool to view, measure and analyze CAN/CAN-FD bus traffic on Windows.</p>
+          <div class="project-meta"><span>C++ / Windows</span><span>Open source</span></div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <a class="project-media" href="#" aria-label="AV-RK MK2 repository — link to be added">
+          <img alt="" loading="lazy" src="img/projects/av-rk-mk2.jpg">
+          <div class="media-placeholder">Image pending</div>
+          <div class="media-hover">
+            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+            <span class="media-hover-text">Click to learn more…</span>
+          </div>
+        </a>
+        <div class="project-body">
+          <div class="project-top">
+            <div class="project-name">AV-RK MK2</div>
+            <div class="project-tag" data-tooltip="These projects are actively used daily!" tabindex="0">Flagship</div>
+          </div>
+          <p class="project-desc justify">An ergonomic, modular mechanical keyboard with fully custom firmware — designed and built from the switches up.</p>
+          <div class="project-meta"><span>Custom firmware</span><span>Hardware design</span></div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <a class="project-media" href="#" aria-label="REBEC2A repository — link to be added">
+          <img alt="" loading="lazy" src="img/projects/rebec2a.jpg">
+          <div class="media-placeholder">Image pending</div>
+          <div class="media-hover">
+            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+            <span class="media-hover-text">Click to learn more…</span>
+          </div>
+        </a>
+        <div class="project-body">
+          <div class="project-top">
+            <div class="project-name">REBEC2A</div>
+          </div>
+          <p class="project-desc justify">REBEC2A (RC Electric Based Experimentation Chassis for Automotive Applications) started as a fun school project between friends that quickly turned into a fully fledged automotive experimentation platform.</p>
+          <div class="project-meta"><span>Automotive platform</span></div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <a class="project-media" href="#" aria-label="Smart Vehicle Safety Demos repository — link to be added">
+          <img alt="" loading="lazy" src="img/projects/safety-demos.jpg">
+          <div class="media-placeholder">Image pending</div>
+          <div class="media-hover">
+            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+            <span class="media-hover-text">Click to learn more…</span>
+          </div>
+        </a>
+        <div class="project-body">
+          <div class="project-top">
+            <div class="project-name">Smart Vehicle Safety Demos</div>
+          </div>
+          <p class="project-desc justify">A set of Arduino-based demonstrations of vehicle safety systems, built during my studies to make abstract automotive safety concepts tangible.</p>
+          <div class="project-meta"><span>Arduino</span><span>Safety systems</span></div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <a class="project-media" href="https://github.com/avmolaei/rIChard" aria-label="rIChard on GitHub">
+          <img alt="" loading="lazy" src="img/projects/richard.jpg">
+          <div class="media-placeholder">Image pending</div>
+          <div class="media-hover">
+            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+            <span class="media-hover-text">Click to learn more…</span>
+          </div>
+        </a>
+        <div class="project-body">
+          <div class="project-top">
+            <div class="project-name">rIChard</div>
+          </div>
+          <p class="project-desc justify">School project: open source Android app to control a Bluetooth-connected relay through an AVR microcontroller. Supports voice control.</p>
+          <div class="project-meta"><span>Java / Android</span><span>Bluetooth</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="skills-h">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="section-head">
+      <h2 id="skills-h"><span class="idx">06</span><span class="sep">-</span>Toolset</h2>
+    </div>
+    <div class="toolset-groups">
+
+      <div class="toolset-group">
+        <div class="toolset-group-name">Automotive Technologies</div>
+        <ul class="toolset-list">
+          <li>Braking Systems — ESP10, TMC, IPB / IBooster / BWA</li>
+          <li>Design, installation, and development of test benches</li>
+          <li>Mechanics and hydraulics, harnesses and electronics, sensors / actuators / acquisition / measurement</li>
+          <li>Bus CAN, CAN HS, CAN FD, FlexRay</li>
+          <li>IMC/Famos, CANalyzer, ACW, MM6x, TKwinX, VX/VN, DASIM, TFW, DASYlab, PEAK-CAN</li>
+        </ul>
+      </div>
+
+      <div class="toolset-group">
+        <div class="toolset-group-name">Electronics</div>
+        <ul class="toolset-list">
+          <li>Analog and Digital Electronics, Simulation (Cadence, LTSpice), Design (Eagle, KiCAD, EasyEDA), Soldering</li>
+          <li>MCU Platforms — PIC16F, ATMEL AVR/Arduino, STM32F4, NXP, ARM Cortex M0, M7</li>
+        </ul>
+      </div>
+
+      <div class="toolset-group">
+        <div class="toolset-group-name">Tools, Machines &amp; CAD/CAM</div>
+        <ul class="toolset-list">
+          <li>3D Printing (FDM, SLA), CNC milling, Soldering, Oscilloscopes, Multimeters</li>
+          <li>Autodesk Fusion 360 <span class="prof">— advanced</span></li>
+          <li>CATIA V5 <span class="prof">— basic</span></li>
+        </ul>
+      </div>
+
+      <div class="toolset-group">
+        <div class="toolset-group-name">Software</div>
+        <ul class="toolset-list">
+          <li>C, Java, MATLAB/Simulink</li>
+          <li>Java for Android <span class="prof">— medium</span></li>
+          <li>Linux <span class="prof">— advanced</span></li>
+          <li>Network &amp; NAS <span class="prof">— advanced</span></li>
+          <li>Virtualization — VMware, VirtualBox</li>
+          <li>Git, GitHub, Cloud</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="meta">© 2026 Avesta Molaei</div>
+    <nav class="socials" aria-label="Social links">
+      <a href="https://www.linkedin.com/in/avesta-molaei/">LinkedIn</a>
+      <a href="https://github.com/avmolaei">GitHub</a>
+    </nav>
   </footer>
 
-</body>
-</html>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = document.querySelectorAll('[data-set-theme]');
+    function apply(mode) {
+      if (mode === 'system') { root.removeAttribute('data-theme'); }
+      else { root.setAttribute('data-theme', mode); }
+      buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.setTheme === mode)); });
+      try { localStorage.setItem('theme-pref', mode); } catch (e) {}
+    }
+    var saved = 'system';
+    try { saved = localStorage.getItem('theme-pref') || 'system'; } catch (e) {}
+    apply(saved);
+    buttons.forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.setTheme); }); });
+  })();
+</script>
+
+<script>
+  // Hero photo "diaporama" — cycles through files in an img/ folder next to
+  // this HTML file. Edit HERO_PHOTOS with your actual filenames; anything
+  // that fails to load is silently skipped rather than showing a broken icon.
+  (function () {
+    var HERO_PHOTOS = ['img/1.jpg', 'img/2.jpg', 'img/3.jpg'];
+    var frame = document.getElementById('photoFrame');
+    if (!frame) return;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var loaded = [];
+    var pending = HERO_PHOTOS.length;
+
+    HERO_PHOTOS.forEach(function (src) {
+      var img = new Image();
+      img.alt = '';
+      img.onload = function () {
+        loaded.push(img);
+        frame.appendChild(img);
+        if (loaded.length === 1) img.classList.add('is-active');
+        settle();
+      };
+      img.onerror = settle;
+      img.src = src;
+    });
+
+    function settle() {
+      pending -= 1;
+      if (pending === 0 && loaded.length > 0) {
+        var fb = frame.querySelector('.fallback');
+        if (fb) fb.remove();
+        if (loaded.length > 1 && !reduced) startCycle();
+      }
+    }
+
+    function startCycle() {
+      var i = 0;
+      setInterval(function () {
+        var next = (i + 1) % loaded.length;
+        loaded[i].classList.remove('is-active');
+        loaded[next].classList.add('is-active');
+        i = next;
+      }, 4500);
+    }
+  })();
+</script>
+
+<script>
+  // Swap the summary label between "See more →" and "Show less" on toggle —
+  // done in JS rather than CSS ::after so there's exactly one source of
+  // truth for the text (no risk of the literal DOM text and generated
+  // content stacking on top of each other).
+  (function () {
+    document.querySelectorAll('details.tl-more, details.edu-more').forEach(function (d) {
+      var s = d.querySelector('summary');
+      if (!s) return;
+      d.addEventListener('toggle', function () {
+        s.textContent = d.open ? 'Show less' : 'See more →';
+      });
+    });
+  })();
+</script>
+
+<script>
+  // Project preview images: mark as loaded on success so the placeholder
+  // hides; on failure, keep the placeholder visible and remove the broken
+  // img element entirely so there's no broken-image icon.
+  (function () {
+    document.querySelectorAll('.project-media img').forEach(function (img) {
+      img.addEventListener('load', function () { img.classList.add('is-loaded'); });
+      img.addEventListener('error', function () { img.remove(); });
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function drawTrace(canvas, opts) {
+      var ctx = canvas.getContext('2d');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var cssW, cssH;
+
+      function resize() {
+        cssW = canvas.clientWidth;
+        cssH = canvas.clientHeight;
+        canvas.width = cssW * dpr;
+        canvas.height = cssH * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      var bits = [];
+      var n = opts.bits || 60;
+      for (var i = 0; i < n; i++) bits.push(Math.random() > 0.62 ? 1 : 0);
+
+      function getColor() {
+        return getComputedStyle(document.documentElement).getPropertyValue('--signal').trim() || '#c97a12';
+      }
+
+      var offset = 0;
+
+      function frame() {
+        ctx.clearRect(0, 0, cssW, cssH);
+        var color = getColor();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = opts.lineWidth || 1.5;
+        ctx.beginPath();
+
+        var segW = cssW / (n - 6);
+        var high = cssH * 0.22;
+        var low = cssH * 0.82;
+
+        var startIdx = Math.floor(offset);
+        var frac = offset - startIdx;
+
+        var x = -frac * segW;
+        var prevY = bits[(startIdx) % n] ? high : low;
+        ctx.moveTo(x, prevY);
+
+        for (var i = 0; i <= n - 6 + 2; i++) {
+          var bit = bits[(startIdx + i) % n];
+          var y = bit ? high : low;
+          x = (i - frac) * segW;
+          ctx.lineTo(x, prevY);
+          ctx.lineTo(x, y);
+          prevY = y;
+        }
+
+        ctx.stroke();
+
+        if (!reduced) {
+          offset += opts.speed || 0.03;
+        }
+        requestAnimationFrame(frame);
+      }
+      frame();
+    }
+
+    document.querySelectorAll('canvas.mini-trace').forEach(function (c) {
+      drawTrace(c, { bits: 50, speed: 0.035, lineWidth: 1.5 });
+    });
+  })();
+</script>
