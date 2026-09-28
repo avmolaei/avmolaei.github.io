@@ -16,6 +16,21 @@
   }
 
   :root {
+    --bg: #0f1720;
+    --surface: #16212c;
+    --surface-2: #1c2933;
+    --ink: #e7edf2;
+    --ink-muted: #8fa3b5;
+    --ink-faint: #5c7082;
+    --line: #2a3a48;
+    --line-strong: #3a4d5c;
+    --signal: #f0a93e;
+    --signal-ink: #16212c;
+    --scrim: rgba(10, 14, 18, 0.82);
+    --shadow: none;
+  }
+
+  :root[data-theme="light"] {
     --bg: #f2f4f6;
     --surface: #ffffff;
     --surface-2: #eaeef1;
@@ -28,22 +43,6 @@
     --signal-ink: #ffffff;
     --scrim: rgba(10, 14, 18, 0.82);
     --shadow: 0 1px 0 rgba(20, 34, 48, 0.04);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0f1720;
-      --surface: #16212c;
-      --surface-2: #1c2933;
-      --ink: #e7edf2;
-      --ink-muted: #8fa3b5;
-      --ink-faint: #5c7082;
-      --line: #2a3a48;
-      --line-strong: #3a4d5c;
-      --signal: #f0a93e;
-      --signal-ink: #16212c;
-      --shadow: none;
-    }
   }
 
   :root[data-theme="dark"] {
@@ -62,12 +61,14 @@
 
   * { box-sizing: border-box; }
 
+  html { font-size: 17.5px; }
+
   body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
-    font-size: 16px;
+    font-size: 17.5px;
     line-height: 1.6;
     background-image:
       linear-gradient(var(--line) 1px, transparent 1px),
@@ -91,42 +92,32 @@
     color: var(--ink);
   }
 
-  .justify { text-align: justify; text-justify: inter-word; hyphens: auto; }
+  .justify { text-align: justify; text-justify: inter-word; hyphens: none; }
 
   .wrap {
-    max-width: 900px;
+    max-width: 1080px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
   /* ---------- Theme toggle ---------- */
   .theme-toggle {
-    position: fixed;
-    top: 18px;
-    right: 18px;
-    z-index: 50;
     display: flex;
-    gap: 2px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    padding: 3px;
+    gap: 12px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    box-shadow: var(--shadow);
+    font-size: 0.72rem;
   }
   .theme-toggle button {
-    background: transparent;
+    background: none;
     border: none;
-    color: var(--ink-muted);
-    padding: 5px 9px;
+    color: var(--ink-faint);
+    padding: 0;
     cursor: pointer;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  .theme-toggle button[aria-pressed="true"] {
-    background: var(--signal);
-    color: var(--signal-ink);
-  }
+  .theme-toggle button:hover { color: var(--ink-muted); }
+  .theme-toggle button[aria-pressed="true"] { color: var(--signal); }
 
   /* ---------- Panel / corner-mark system ---------- */
   .panel {
@@ -155,15 +146,45 @@
     padding-bottom: 40px;
   }
   .hero-top {
-    display: flex;
-    gap: clamp(24px, 5vw, 48px);
-    align-items: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto max-content 1fr;
+    grid-template-rows: auto auto;
+    column-gap: clamp(24px, 5vw, 48px);
+    row-gap: 16px;
+    align-items: start;
   }
+  .hero-id {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .hero-contact-btn, .hero-cv-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--signal);
+    background: none;
+    border: 1px solid var(--signal);
+    width: 152px;
+    padding: 4px 0;
+    margin: 0;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    box-sizing: border-box;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .hero-contact-btn:hover, .hero-cv-link:hover { background: var(--signal); color: var(--signal-ink); }
+  .hero-cv-link { grid-column: 1; grid-row: 2; align-self: start; }
   .photo-frame {
-    flex: none;
-    width: 128px;
-    height: 128px;
+    width: 152px;
+    height: 152px;
     border: 1px solid var(--line-strong);
     background: var(--surface-2);
     position: relative;
@@ -190,20 +211,68 @@
     font-size: 2.6rem;
     color: var(--ink-muted);
   }
-  .hero-name-block { flex: 1 1 320px; min-width: 0; }
+  .hero-name-block { grid-column: 2; grid-row: 1; min-width: 0; align-self: center; }
   .hero h1 {
     font-size: clamp(2.6rem, 7vw, 4.6rem);
     font-weight: 800;
     line-height: 0.96;
     letter-spacing: -0.01em;
   }
-  .hero .role {
+  .hero-trace {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: stretch;
+    justify-self: stretch;
+    min-width: 160px;
+    min-height: 96px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-trace canvas.mini-trace { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero-trace-label {
+    position: absolute;
+    left: 10px;
+    top: 8px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+  .hero-trace-hint {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.02em;
+    color: var(--ink-faint);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .hero .role {
+    grid-column: 2 / span 2;
+    grid-row: 2;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(15.2px, 2vw, 18.4px);
     color: var(--ink-muted);
-    margin-top: 10px;
+    margin: 0;
+    white-space: nowrap;
   }
   .hero .role strong { color: var(--ink); font-weight: 500; }
+  @media (max-width: 720px) {
+    .hero-top { grid-template-columns: auto 1fr; row-gap: 8px; }
+    .hero-id { display: contents; }
+    .photo-frame { grid-column: 1; grid-row: 1 / span 3; }
+    .hero-name-block { grid-column: 2; grid-row: 1; align-self: center; }
+    .hero-contact-btn { grid-column: 2; grid-row: 2; }
+    .hero-cv-link { grid-column: 2; grid-row: 3; }
+    .hero .role { grid-column: 1 / -1; grid-row: 4; white-space: normal; margin-top: 6px; }
+    .hero-trace { display: none; }
+  }
 
   .contact-strip {
     margin-top: 28px;
@@ -244,12 +313,12 @@
     background: var(--surface);
     border: 1px solid var(--line);
     padding: 32px clamp(20px, 4vw, 40px);
-    max-width: 380px;
+    max-width: 460px;
     width: 100%;
   }
   .modal-panel h2 {
     font-family: 'ISOCPEUR', 'Titillium Web', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.05rem;
     font-weight: 700;
   }
   .modal-close {
@@ -296,13 +365,12 @@
   .section-head h2 .sep { color: var(--line-strong); margin: 0 0.28em; font-weight: 400; }
   .section-lede {
     color: var(--ink-muted);
-    max-width: 62ch;
     margin-top: 10px;
     font-size: 0.98rem;
   }
 
   /* ---------- About / bio ---------- */
-  .about p { max-width: 66ch; color: var(--ink); }
+  .about p { color: var(--ink); }
   .about p + p { margin-top: 16px; }
 
   /* ---------- Timeline ---------- */
@@ -339,7 +407,7 @@
   .tl-item.current .tl-date { color: var(--signal); }
   .tl-role { font-size: 1.15rem; font-weight: 600; margin-top: 4px; }
   .tl-org { color: var(--ink-muted); font-size: 0.95rem; }
-  .tl-preview { color: var(--ink-muted); font-size: 0.92rem; margin-top: 8px; max-width: 60ch; }
+  .tl-preview { color: var(--ink-muted); font-size: 0.92rem; margin-top: 8px; }
 
   details.tl-more, details.edu-more { margin-top: 10px; }
   details.tl-more summary, details.edu-more summary {
@@ -374,8 +442,8 @@
   details.tl-more summary::marker,
   details.edu-more summary::marker { content: ""; }
 
-  .tl-full-intro { color: var(--ink-muted); font-size: 0.9rem; margin-top: 10px; max-width: 60ch; }
-  .tl-cat { margin-top: 16px; max-width: 62ch; }
+  .tl-full-intro { color: var(--ink-muted); font-size: 0.9rem; margin-top: 10px; }
+  .tl-cat { margin-top: 16px; }
   .tl-cat:first-child { margin-top: 12px; }
   .tl-cat-name { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
   .tl-cat-sub { font-weight: 400; font-style: italic; color: var(--ink-muted); }
@@ -389,8 +457,8 @@
   .edu-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: baseline; }
   .edu-school { font-size: 1.1rem; font-weight: 600; }
   .edu-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--ink-faint); white-space: nowrap; }
-  .edu-preview { color: var(--ink-muted); font-size: 0.92rem; margin-top: 8px; max-width: 60ch; }
-  .edu-full p { color: var(--ink-muted); font-size: 0.92rem; max-width: 60ch; margin: 10px 0 0; }
+  .edu-preview { color: var(--ink-muted); font-size: 0.92rem; margin-top: 8px; }
+  .edu-full p { color: var(--ink-muted); font-size: 0.92rem; margin: 10px 0 0; }
 
   /* ---------- Certifications: ledger list ---------- */
   .cert-ledger { border-top: 1px solid var(--line); }
@@ -541,7 +609,7 @@
     padding: 8px 10px;
     pointer-events: none;
   }
-  .project-desc { color: var(--ink-muted); font-size: 0.92rem; margin-top: 10px; max-width: 54ch; }
+  .project-desc { color: var(--ink-muted); font-size: 0.92rem; margin-top: 10px; }
   .project-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: auto; padding-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink-faint); }
 
   /* ---------- Toolset ---------- */
@@ -561,7 +629,6 @@
     font-size: 0.95rem;
     padding: 6px 0;
     border-top: 1px solid var(--line);
-    max-width: 68ch;
   }
   .toolset-list li:first-child { border-top: none; }
 
@@ -578,42 +645,41 @@
   }
 </style>
 
-<div class="theme-toggle" role="group" aria-label="Theme">
-  <button type="button" data-set-theme="light" aria-pressed="false">Light</button>
-  <button type="button" data-set-theme="dark" aria-pressed="false">Dark</button>
-  <button type="button" data-set-theme="system" aria-pressed="true">Auto</button>
-</div>
 
 <div class="wrap" lang="en">
 
   <section class="hero">
     <div class="hero-top">
-      <div class="photo-frame" id="photoFrame" aria-hidden="true">
-        <div class="fallback">AM</div>
+      <div class="hero-id">
+        <div class="photo-frame" id="photoFrame" aria-hidden="true">
+          <div class="fallback">AM</div>
+        </div>
+        <button type="button" id="contactTrigger" class="hero-contact-btn" aria-haspopup="dialog" aria-controls="contactModal">Contact me</button>
       </div>
+      <a href="cv.pdf" class="hero-cv-link">CV</a>
       <div class="hero-name-block">
         <h1>Avesta<br>Molaei</h1>
-        <p class="role">Automotive Testing Engineer — <strong>Bosch France</strong></p>
       </div>
+      <div class="hero-trace" aria-hidden="true">
+        <span class="hero-trace-label">CAN&nbsp;·&nbsp;500&nbsp;kbps</span>
+        <span class="hero-trace-hint">//&nbsp;decode&nbsp;me&nbsp;:)</span>
+        <canvas class="mini-trace"></canvas>
+      </div>
+      <p class="role">Automotive Testing Engineer — Brake Systems Software Division — <strong>Bosch France</strong></p>
     </div>
 
-    <nav class="contact-strip" aria-label="Contact">
-      <a href="https://www.linkedin.com/in/avesta-molaei/">LinkedIn</a>
-      <a href="https://github.com/avmolaei">GitHub</a>
-      <a href="cv.pdf">CV</a>
-      <button type="button" id="contactTrigger" aria-haspopup="dialog" aria-controls="contactModal">Contact me</button>
-    </nav>
   </section>
 
   <div class="modal-overlay" id="contactModal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
       <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
       <button type="button" class="modal-close" id="contactModalClose" aria-label="Close">&times;</button>
-      <h2 id="contactModalTitle">Get in touch</h2>
+      <h2 id="contactModalTitle">//no arbitration or CRC check: every message gets through!</h2>
       <ul class="modal-contact-list">
         <li><span class="modal-contact-label">Email</span><a href="mailto:avmolaei@gmail.com">avmolaei@gmail.com</a></li>
         <li><span class="modal-contact-label">Discord</span><span>av64</span></li>
         <li><span class="modal-contact-label">LinkedIn</span><a href="https://www.linkedin.com/in/avesta-molaei/">linkedin.com/in/avesta-molaei</a></li>
+        <li><span class="modal-contact-label">GitHub</span><a href="https://github.com/avmolaei">github.com/avmolaei</a></li>
       </ul>
     </div>
   </div>
@@ -1011,10 +1077,11 @@
 
   <footer class="footer">
     <div class="meta">© 2026 Avesta Molaei</div>
-    <nav class="socials" aria-label="Social links">
-      <a href="https://www.linkedin.com/in/avesta-molaei/">LinkedIn</a>
-      <a href="https://github.com/avmolaei">GitHub</a>
-    </nav>
+    <div class="theme-toggle" role="group" aria-label="Theme">
+      <button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+      <button type="button" data-set-theme="dark" aria-pressed="false">Dark</button>
+      <button type="button" data-set-theme="system" aria-pressed="true">Auto</button>
+    </div>
   </footer>
 
 </div>
@@ -1143,16 +1210,24 @@
       function resize() {
         cssW = canvas.clientWidth;
         cssH = canvas.clientHeight;
-        canvas.width = cssW * dpr;
-        canvas.height = cssH * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (!cssW || !cssH) return;
+        var w = Math.round(cssW * dpr);
+        var h = Math.round(cssH * dpr);
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
       }
       resize();
-      window.addEventListener('resize', resize);
 
-      var bits = [];
-      var n = opts.bits || 60;
-      for (var i = 0; i < n; i++) bits.push(Math.random() > 0.62 ? 1 : 0);
+      var bits = opts.pattern ? opts.pattern.slice() : (function () {
+        var arr = [];
+        var count = opts.bits || 60;
+        for (var i = 0; i < count; i++) arr.push(Math.random() > 0.62 ? 1 : 0);
+        return arr;
+      })();
+      var n = bits.length;
 
       function getColor() {
         return getComputedStyle(document.documentElement).getPropertyValue('--signal').trim() || '#c97a12';
@@ -1161,6 +1236,8 @@
       var offset = 0;
 
       function frame() {
+        resize();
+        if (!cssW || !cssH) { requestAnimationFrame(frame); return; }
         ctx.clearRect(0, 0, cssW, cssH);
         var color = getColor();
         ctx.strokeStyle = color;
@@ -1168,8 +1245,8 @@
         ctx.beginPath();
 
         var segW = cssW / (n - 6);
-        var high = cssH * 0.22;
-        var low = cssH * 0.82;
+        var high = opts.highOffset != null ? opts.highOffset : cssH * 0.22;
+        var low = opts.lowOffset != null ? (cssH - opts.lowOffset) : cssH * 0.82;
 
         var startIdx = Math.floor(offset);
         var frac = offset - startIdx;
@@ -1189,6 +1266,24 @@
 
         ctx.stroke();
 
+        if (opts.frameMarker) {
+          ctx.save();
+          ctx.strokeStyle = '#ffffff';
+          ctx.globalAlpha = 0.6;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 3]);
+          for (var mi = 0; mi <= n - 6 + 2; mi++) {
+            if ((startIdx + mi) % n === 0) {
+              var mx = (mi - frac) * segW;
+              ctx.beginPath();
+              ctx.moveTo(mx, 0);
+              ctx.lineTo(mx, cssH);
+              ctx.stroke();
+            }
+          }
+          ctx.restore();
+        }
+
         if (!reduced) {
           offset += opts.speed || 0.03;
         }
@@ -1197,8 +1292,12 @@
       frame();
     }
 
+    var CAN_FRAME_BITS = [0,1,0,1,0,0,1,1,1,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,1,0,1,0,1,0,1,1,0,0,1,0,0,1,1,0,1,0,1,0,0,1,1,1,1,0,1,0,0,1,1,0,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1,0,0,1,1,1,0,0,1,1,0,0,1,1,0,0,1,0,0,1,0,1,1,1,1,1,1,1,1];
     document.querySelectorAll('canvas.mini-trace').forEach(function (c) {
-      drawTrace(c, { bits: 50, speed: 0.035, lineWidth: 1.5 });
+      var inHero = c.closest && c.closest('.hero-trace');
+      drawTrace(c, inHero
+        ? { pattern: CAN_FRAME_BITS, speed: 0.035, lineWidth: 1.5, highOffset: 28, lowOffset: 2, frameMarker: true }
+        : { bits: 50, speed: 0.035, lineWidth: 1.5 });
     });
   })();
 </script>
