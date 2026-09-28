@@ -1040,9 +1040,13 @@
   // Hero photo "diaporama" — cycles through files in an img/ folder next to
   // this HTML file. Edit HERO_PHOTOS with your actual filenames; anything
   // that fails to load is silently skipped rather than showing a broken icon.
+  // FIRST_PHOTO always opens the slideshow (loaded in parallel with the
+  // rest, so its load order isn't a race); everything after it cycles in
+  // a random order per page load.
   (function () {
+    var FIRST_PHOTO = 'img/hero/Photo_Avesta_MOLAEI.jpg';
     var HERO_PHOTOS = [
-      'img/hero/Photo_Avesta_MOLAEI.jpg',
+      FIRST_PHOTO,
       'img/hero/av.jpg',
       'img/hero/32802803.jpg',
       'img/hero/daily-dose-of-fluff-3057-loader-yukari-akiyama-reporting-v0-fqr79bce3vve1.png'
@@ -1050,37 +1054,49 @@
     var frame = document.getElementById('photoFrame');
     if (!frame) return;
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var loaded = [];
+    var loadedBySrc = {};
     var pending = HERO_PHOTOS.length;
 
     HERO_PHOTOS.forEach(function (src) {
       var img = new Image();
       img.alt = '';
-      img.onload = function () {
-        loaded.push(img);
-        frame.appendChild(img);
-        if (loaded.length === 1) img.classList.add('is-active');
-        settle();
-      };
+      img.onload = function () { loadedBySrc[src] = img; settle(); };
       img.onerror = settle;
       img.src = src;
     });
 
     function settle() {
       pending -= 1;
-      if (pending === 0 && loaded.length > 0) {
-        var fb = frame.querySelector('.fallback');
-        if (fb) fb.remove();
-        if (loaded.length > 1 && !reduced) startCycle();
-      }
+      if (pending === 0) finish();
     }
 
-    function startCycle() {
+    function finish() {
+      var order = [];
+      if (loadedBySrc[FIRST_PHOTO]) order.push(FIRST_PHOTO);
+      var rest = Object.keys(loadedBySrc).filter(function (src) { return src !== FIRST_PHOTO; });
+      for (var i = rest.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = rest[i]; rest[i] = rest[j]; rest[j] = tmp;
+      }
+      order = order.concat(rest);
+      if (order.length === 0) return;
+
+      var fb = frame.querySelector('.fallback');
+      if (fb) fb.remove();
+
+      var images = order.map(function (src) { return loadedBySrc[src]; });
+      images.forEach(function (img) { frame.appendChild(img); });
+      images[0].classList.add('is-active');
+
+      if (images.length > 1 && !reduced) startCycle(images);
+    }
+
+    function startCycle(images) {
       var i = 0;
       setInterval(function () {
-        var next = (i + 1) % loaded.length;
-        loaded[i].classList.remove('is-active');
-        loaded[next].classList.add('is-active');
+        var next = (i + 1) % images.length;
+        images[i].classList.remove('is-active');
+        images[next].classList.add('is-active');
         i = next;
       }, 30000);
     }
