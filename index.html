@@ -213,15 +213,78 @@
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.82rem;
   }
-  .contact-strip a {
+  .contact-strip a, .contact-strip button {
     color: var(--ink-muted);
     text-decoration: none;
     padding-right: 14px;
     margin-right: 14px;
+    border: none;
     border-right: 1px solid var(--line);
+    background: none;
+    font: inherit;
+    cursor: pointer;
   }
-  .contact-strip a:last-child { border-right: none; margin-right: 0; padding-right: 0; }
-  .contact-strip a:hover { color: var(--signal); }
+  .contact-strip a:last-child, .contact-strip button:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+  .contact-strip a:hover, .contact-strip button:hover { color: var(--signal); }
+
+  /* ---------- Contact modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--scrim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 32px clamp(20px, 4vw, 40px);
+    max-width: 380px;
+    width: 100%;
+  }
+  .modal-panel h2 {
+    font-family: 'ISOCPEUR', 'Titillium Web', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .modal-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 8px;
+  }
+  .modal-close:hover { color: var(--signal); }
+  .modal-contact-list { list-style: none; margin: 20px 0 0; padding: 0; }
+  .modal-contact-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88rem;
+  }
+  .modal-contact-list li:first-child { border-top: none; }
+  .modal-contact-label {
+    color: var(--ink-faint);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .modal-contact-list a { color: var(--ink); text-decoration: none; }
+  .modal-contact-list a:hover { color: var(--signal); }
 
   /* ---------- Section headings ---------- */
   .section-head { margin-bottom: 28px; }
@@ -352,9 +415,54 @@
   .cert-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: var(--ink-faint); white-space: nowrap; letter-spacing: 0.04em; }
 
   /* ---------- Projects ---------- */
-  .project-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
-  @media (min-width: 700px) { .project-grid { grid-template-columns: 1fr 1fr; } }
-  .project-card { background: var(--surface); display: flex; flex-direction: column; }
+  .project-carousel { position: relative; }
+  .project-viewport {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .project-viewport::-webkit-scrollbar { display: none; }
+  .project-track { display: flex; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .project-card {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 560px) { .project-card { flex-basis: calc(50% - 0.5px); } }
+  @media (min-width: 860px) { .project-card { flex-basis: calc((100% / 3) - (2px / 3)); } }
+
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .carousel-arrow:hover { color: var(--signal); border-color: var(--signal); }
+  .carousel-arrow.prev { left: -15px; }
+  .carousel-arrow.next { right: -15px; }
+  .carousel-arrow:disabled { opacity: 0.3; cursor: default; }
+  .carousel-arrow:disabled:hover { color: var(--ink); border-color: var(--line-strong); }
+  @media (max-width: 640px) {
+    .carousel-arrow.prev { left: 2px; }
+    .carousel-arrow.next { right: 2px; }
+  }
 
   .project-media {
     display: block;
@@ -410,18 +518,20 @@
     white-space: nowrap;
     cursor: default;
   }
-  .project-tag[data-tooltip]:hover::after,
-  .project-tag[data-tooltip]:focus-visible::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
+  .project-tag.legacy { color: var(--ink-faint); border-color: var(--line-strong); }
+
+  /* Tooltip is a body-level element positioned via JS (see script below)
+     rather than a ::after on the tag, so it isn't clipped by the
+     horizontally-scrolling carousel viewport. */
+  .js-tooltip {
+    position: fixed;
+    z-index: 200;
     width: max-content;
     max-width: min(210px, 68vw);
     box-sizing: border-box;
     background: var(--ink);
     color: var(--bg);
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 0.72rem;
     letter-spacing: normal;
     text-transform: none;
@@ -429,7 +539,7 @@
     text-align: left;
     line-height: 1.4;
     padding: 8px 10px;
-    z-index: 10;
+    pointer-events: none;
   }
   .project-desc { color: var(--ink-muted); font-size: 0.92rem; margin-top: 10px; max-width: 54ch; }
   .project-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: auto; padding-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink-faint); }
@@ -454,7 +564,6 @@
     max-width: 68ch;
   }
   .toolset-list li:first-child { border-top: none; }
-  .toolset-list .prof { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; }
 
   /* ---------- Footer ---------- */
   .footer { padding: 40px clamp(20px, 4vw, 48px) 56px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
@@ -492,8 +601,22 @@
       <a href="https://www.linkedin.com/in/avesta-molaei/">LinkedIn</a>
       <a href="https://github.com/avmolaei">GitHub</a>
       <a href="cv.pdf">CV</a>
+      <button type="button" id="contactTrigger" aria-haspopup="dialog" aria-controls="contactModal">Contact me</button>
     </nav>
   </section>
+
+  <div class="modal-overlay" id="contactModal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+      <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+      <button type="button" class="modal-close" id="contactModalClose" aria-label="Close">&times;</button>
+      <h2 id="contactModalTitle">Get in touch</h2>
+      <ul class="modal-contact-list">
+        <li><span class="modal-contact-label">Email</span><a href="mailto:avmolaei@gmail.com">avmolaei@gmail.com</a></li>
+        <li><span class="modal-contact-label">Discord</span><span>av64</span></li>
+        <li><span class="modal-contact-label">LinkedIn</span><a href="https://www.linkedin.com/in/avesta-molaei/">linkedin.com/in/avesta-molaei</a></li>
+      </ul>
+    </div>
+  </div>
 
   <section class="panel" aria-labelledby="about-h">
     <div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
@@ -689,82 +812,147 @@
       <h2 id="proj-h"><span class="idx">05</span><span class="sep">-</span>Output</h2>
       <p class="section-lede">My personal projects, built on my own time.</p>
     </div>
-    <div class="project-grid">
+    <div class="project-carousel">
+      <button type="button" class="carousel-arrow prev" id="projectsPrev" aria-label="Scroll to previous projects">‹</button>
+      <div class="project-viewport" id="projectsViewport">
+        <div class="project-track">
 
-      <div class="project-card">
-        <a class="project-media" href="https://avmolaei.com/CANtrip/" aria-label="CANtrip">
-          <img alt="" loading="lazy" src="img/projects/cantrip.png">
-          <div class="media-placeholder">Image pending</div>
-          <div class="media-hover">
-            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
-            <span class="media-hover-text">Click to learn more…</span>
+          <div class="project-card">
+            <a class="project-media" href="https://avmolaei.com/CANtrip/" aria-label="CANtrip">
+              <img alt="" loading="lazy" src="img/projects/cantrip.png">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">CANtrip</div>
+                <div class="project-tag" data-tooltip="These projects are actively used daily!" tabindex="0">Flagship</div>
+              </div>
+              <p class="project-desc justify">Free and Open Source tool to view, measure and analyze CAN/CAN-FD bus traffic on Windows.</p>
+              <div class="project-meta"><span>C++ / Windows</span><span>Open source</span></div>
+            </div>
           </div>
-        </a>
-        <div class="project-body">
-          <div class="project-top">
-            <div class="project-name">CANtrip</div>
-            <div class="project-tag" data-tooltip="These projects are actively used daily!" tabindex="0">Flagship</div>
+
+          <div class="project-card">
+            <a class="project-media" href="https://github.com/avmolaei/AV-RK-MK2" aria-label="AV-RK MK2 on GitHub">
+              <img alt="" loading="lazy" src="img/projects/avrkmk2.gif">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">AV-RK MK2</div>
+                <div class="project-tag" data-tooltip="These projects are actively used daily!" tabindex="0">Flagship</div>
+              </div>
+              <p class="project-desc justify">An ergonomic, modular mechanical keyboard with fully custom firmware — designed and built from the switches up.</p>
+              <div class="project-meta"><span>Custom firmware</span><span>Hardware design</span></div>
+            </div>
           </div>
-          <p class="project-desc justify">Free and Open Source tool to view, measure and analyze CAN/CAN-FD bus traffic on Windows.</p>
-          <div class="project-meta"><span>C++ / Windows</span><span>Open source</span></div>
+
+          <div class="project-card">
+            <a class="project-media" href="https://github.com/f4iey/rebec2a" aria-label="REBEC2A on GitHub">
+              <img alt="" loading="lazy" src="img/projects/REBEC2A.jpg">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">REBEC2A</div>
+                <div class="project-tag legacy" data-tooltip="either a school project or something I haven't worked on in a while..." tabindex="0">Legacy</div>
+              </div>
+              <p class="project-desc justify">REBEC2A (RC Electric Based Experimentation Chassis for Automotive Applications) started as a fun school project between friends that quickly turned into a fully fledged automotive experimentation platform.</p>
+              <div class="project-meta"><span>Automotive platform</span></div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <a class="project-media" href="https://github.com/avmolaei/AV-GMK-MKI" aria-label="AV-GMK MK I on GitHub">
+              <img alt="" loading="lazy" src="img/projects/avgmkmki.png">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">AV-GMK MK I</div>
+                <div class="project-tag legacy" data-tooltip="either a school project or something I haven't worked on in a while..." tabindex="0">Legacy</div>
+              </div>
+              <p class="project-desc justify">A full size ortholinear gaming keyboard with a more traditional layout than the AV-RK series. Alpha layout, per key RGB backlighting, fully custom firmware and PCB.</p>
+              <div class="project-meta"><span>PCB design</span><span>RGB lights</span><span>Custom Firmware</span></div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <a class="project-media" href="https://github.com/avmolaei/AV-RK-MK1" aria-label="AV-RK MK I on GitHub">
+              <img alt="" loading="lazy" src="img/projects/avrkmk1.png">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">AV-RK MK I</div>
+                <div class="project-tag legacy" data-tooltip="either a school project or something I haven't worked on in a while..." tabindex="0">Legacy</div>
+              </div>
+              <p class="project-desc justify">The first revision of the AV-RK MKI, the low profile redox style split keyboard. Featuring low profile kailh choc switches and a from scratch case design.</p>
+              <div class="project-meta"><span>Hardware design</span><span>3D printed</span></div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <a class="project-media" href="https://github.com/avmolaei/AV-KO1" aria-label="AV-KO1 MK I on GitHub">
+              <img alt="" loading="lazy" src="img/projects/avko1.png">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">AV-KO1 MK I</div>
+                <div class="project-tag legacy" data-tooltip="either a school project or something I haven't worked on in a while..." tabindex="0">Legacy</div>
+              </div>
+              <p class="project-desc justify">A budget oriented handwired compact ortholinear keyboard, firmware based on QMK.</p>
+              <div class="project-meta"><span>Handwire</span><span>3D printed</span></div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <a class="project-media" href="https://github.com/avmolaei/rIChard" aria-label="rIChard on GitHub">
+              <img alt="" loading="lazy" src="img/projects/richard.png">
+              <div class="media-placeholder"></div>
+              <div class="media-hover">
+                <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
+                <span class="media-hover-text">Click to learn more…</span>
+              </div>
+            </a>
+            <div class="project-body">
+              <div class="project-top">
+                <div class="project-name">rIChard</div>
+                <div class="project-tag legacy" data-tooltip="either a school project or something I haven't worked on in a while..." tabindex="0">Legacy</div>
+              </div>
+              <p class="project-desc justify">School project: open source Android app to control a Bluetooth-connected relay through an AVR microcontroller. Supports voice control.</p>
+              <div class="project-meta"><span>Java / Android</span><span>Bluetooth</span></div>
+            </div>
+          </div>
+
         </div>
       </div>
-
-      <div class="project-card">
-        <a class="project-media" href="https://github.com/avmolaei/AV-RK-MK2" aria-label="AV-RK MK2 on GitHub">
-          <img alt="" loading="lazy" src="img/projects/avrkmk2.gif">
-          <div class="media-placeholder">Image pending</div>
-          <div class="media-hover">
-            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
-            <span class="media-hover-text">Click to learn more…</span>
-          </div>
-        </a>
-        <div class="project-body">
-          <div class="project-top">
-            <div class="project-name">AV-RK MK2</div>
-            <div class="project-tag" data-tooltip="These projects are actively used daily!" tabindex="0">Flagship</div>
-          </div>
-          <p class="project-desc justify">An ergonomic, modular mechanical keyboard with fully custom firmware — designed and built from the switches up.</p>
-          <div class="project-meta"><span>Custom firmware</span><span>Hardware design</span></div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <a class="project-media" href="https://github.com/f4iey/rebec2a" aria-label="REBEC2A on GitHub">
-          <img alt="" loading="lazy" src="img/projects/REBEC2A.jpg">
-          <div class="media-placeholder">Image pending</div>
-          <div class="media-hover">
-            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
-            <span class="media-hover-text">Click to learn more…</span>
-          </div>
-        </a>
-        <div class="project-body">
-          <div class="project-top">
-            <div class="project-name">REBEC2A</div>
-          </div>
-          <p class="project-desc justify">REBEC2A (RC Electric Based Experimentation Chassis for Automotive Applications) started as a fun school project between friends that quickly turned into a fully fledged automotive experimentation platform.</p>
-          <div class="project-meta"><span>Automotive platform</span></div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <a class="project-media" href="https://github.com/avmolaei/rIChard" aria-label="rIChard on GitHub">
-          <img alt="" loading="lazy" src="img/projects/richard.png">
-          <div class="media-placeholder">Image pending</div>
-          <div class="media-hover">
-            <canvas class="mini-trace" width="1200" height="60" aria-hidden="true"></canvas>
-            <span class="media-hover-text">Click to learn more…</span>
-          </div>
-        </a>
-        <div class="project-body">
-          <div class="project-top">
-            <div class="project-name">rIChard</div>
-          </div>
-          <p class="project-desc justify">School project: open source Android app to control a Bluetooth-connected relay through an AVR microcontroller. Supports voice control.</p>
-          <div class="project-meta"><span>Java / Android</span><span>Bluetooth</span></div>
-        </div>
-      </div>
-
+      <button type="button" class="carousel-arrow next" id="projectsNext" aria-label="Scroll to next projects">›</button>
     </div>
   </section>
 
@@ -783,6 +971,7 @@
           <li>Mechanics and hydraulics, harnesses and electronics, sensors / actuators / acquisition / measurement</li>
           <li>Bus CAN, CAN HS, CAN FD, FlexRay</li>
           <li>IMC/Famos, CANalyzer, ACW, MM6x, TKwinX, VX/VN, DASIM, TFW, DASYlab, PEAK-CAN</li>
+          <li>IPG CarMaker — HiL, SiL</li>
         </ul>
       </div>
 
@@ -798,8 +987,8 @@
         <div class="toolset-group-name">Tools, Machines &amp; CAD/CAM</div>
         <ul class="toolset-list">
           <li>3D Printing (FDM, SLA), CNC milling, Soldering, Oscilloscopes, Multimeters</li>
-          <li>Autodesk Fusion 360 <span class="prof">— advanced</span></li>
-          <li>CATIA V5 <span class="prof">— basic</span></li>
+          <li>Autodesk Fusion 360</li>
+          <li>CATIA V5, SolidWorks</li>
         </ul>
       </div>
 
@@ -807,9 +996,11 @@
         <div class="toolset-group-name">Software</div>
         <ul class="toolset-list">
           <li>C, Java, MATLAB/Simulink</li>
-          <li>Java for Android <span class="prof">— medium</span></li>
-          <li>Linux <span class="prof">— advanced</span></li>
-          <li>Network &amp; NAS <span class="prof">— advanced</span></li>
+          <li>C++ — CAN, Real Time</li>
+          <li>Python — tooling, SW testing</li>
+          <li>Java for Android</li>
+          <li>Linux</li>
+          <li>Network &amp; NAS</li>
           <li>Virtualization — VMware, VirtualBox</li>
           <li>Git, GitHub, Cloud</li>
         </ul>
@@ -992,5 +1183,107 @@
     document.querySelectorAll('canvas.mini-trace').forEach(function (c) {
       drawTrace(c, { bits: 50, speed: 0.035, lineWidth: 1.5 });
     });
+  })();
+</script>
+
+<script>
+  // Projects carousel: arrows scroll by one card width at a time, using
+  // native scroll-snap for the "settle on a card" feel.
+  (function () {
+    var viewport = document.getElementById('projectsViewport');
+    var track = viewport ? viewport.querySelector('.project-track') : null;
+    var prev = document.getElementById('projectsPrev');
+    var next = document.getElementById('projectsNext');
+    if (!viewport || !track || !prev || !next) return;
+
+    function step() {
+      var card = track.querySelector('.project-card');
+      if (!card) return viewport.clientWidth;
+      var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '0') || 0;
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    function updateArrows() {
+      var max = viewport.scrollWidth - viewport.clientWidth - 1;
+      prev.disabled = viewport.scrollLeft <= 0;
+      next.disabled = viewport.scrollLeft >= max;
+    }
+
+    prev.addEventListener('click', function () { viewport.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    next.addEventListener('click', function () { viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
+    viewport.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
+  })();
+</script>
+
+<script>
+  // Contact modal — plain overlay dialog, closes on Escape, backdrop click,
+  // or the close button, and restores focus to whatever opened it.
+  (function () {
+    var trigger = document.getElementById('contactTrigger');
+    var modal = document.getElementById('contactModal');
+    var closeBtn = document.getElementById('contactModalClose');
+    if (!trigger || !modal || !closeBtn) return;
+    var lastFocused = null;
+
+    function onKeydown(e) {
+      if (e.key === 'Escape') close();
+    }
+    function open() {
+      lastFocused = document.activeElement;
+      modal.hidden = false;
+      closeBtn.focus();
+      document.addEventListener('keydown', onKeydown);
+    }
+    function close() {
+      modal.hidden = true;
+      document.removeEventListener('keydown', onKeydown);
+      if (lastFocused) lastFocused.focus();
+    }
+
+    trigger.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+  })();
+</script>
+
+<script>
+  // [data-tooltip] hover/focus popovers, rendered as a fixed-position
+  // element on <body> instead of a ::after on the trigger, so they aren't
+  // clipped by the carousel's overflow-x: auto viewport.
+  (function () {
+    var tooltip = null;
+
+    function show(el) {
+      var text = el.getAttribute('data-tooltip');
+      if (!text) return;
+      tooltip = document.createElement('div');
+      tooltip.className = 'js-tooltip';
+      tooltip.textContent = text;
+      document.body.appendChild(tooltip);
+
+      var rect = el.getBoundingClientRect();
+      var tw = tooltip.offsetWidth;
+      var th = tooltip.offsetHeight;
+      var left = rect.left + rect.width / 2 - tw / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+      var top = rect.top - th - 8;
+      if (top < 8) top = rect.bottom + 8;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    function hide() {
+      if (tooltip) { tooltip.remove(); tooltip = null; }
+    }
+
+    document.querySelectorAll('[data-tooltip]').forEach(function (el) {
+      el.addEventListener('mouseenter', function () { show(el); });
+      el.addEventListener('mouseleave', hide);
+      el.addEventListener('focus', function () { show(el); });
+      el.addEventListener('blur', hide);
+    });
+    window.addEventListener('scroll', hide, true);
   })();
 </script>
